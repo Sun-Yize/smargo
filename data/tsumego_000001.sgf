@@ -1,0 +1,17 @@
+(
+;
+FF[4]
+SO[Oscar Korschelt: The Theory and Practice of Go]
+US[Topher A. Cawlfield]
+GN[problem 1b]
+AP[sgf2misc:3.1.6]
+AB[qb][qd][rc][rd]AW[nc][pc][pd][qc][qe][re]VW[ka:sh]
+C[To make positions alive. \
+problem 1b \
+Black to play
+]
+FG[]
+
+;B[sb];W[ra]
+;B[sd];W[pb];B[qa]
+)

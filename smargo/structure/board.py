@@ -22,8 +22,9 @@ def next_state(state, action1d):
         killed_group = killed_groups[0]
         if len(killed_group) == 1:
             ko_protect = killed_group[0]
-    state[VALID_CHAN] = compute_valid_moves(state, player, ko_protect)
     state[TURN_CHAN] = 1 - state[TURN_CHAN]
+    player = turn(state)
+    state[VALID_CHAN] = compute_valid_moves(state, player, ko_protect)
 
 
 def update_pieces(state, adj_locs, player):
@@ -76,28 +77,25 @@ def compute_valid_moves(state, player, ko_protect=None):
     )
     own_liberty_counts = np.sum(all_own_liberties, axis=(1, 2))
     opp_liberty_counts = np.sum(all_opp_liberties, axis=(1, 2))
-    possible_invalid_array += np.sum(all_own_liberties[own_liberty_counts > 1], axis=0)
-    possible_invalid_array += np.sum(all_opp_liberties[opp_liberty_counts == 1], axis=0)
-    definite_valids_array += np.sum(all_own_liberties[own_liberty_counts == 1], axis=0)
-    definite_valids_array += np.sum(all_opp_liberties[opp_liberty_counts > 1], axis=0)
-    surrounded = (
-        ndimage.convolve(all_pieces, surround_struct, mode="constant", cval=1) == 4
-    )
+
+    possible_invalid_array += np.sum(all_own_liberties[own_liberty_counts == 1], axis=0)
+    possible_invalid_array += np.sum(all_opp_liberties[opp_liberty_counts > 1], axis=0)
+    definite_valids_array += np.sum(all_own_liberties[own_liberty_counts > 1], axis=0)
+    definite_valids_array += np.sum(all_opp_liberties[opp_liberty_counts == 1], axis=0)
+
+    all_pieces_con = ndimage.convolve(all_pieces, surround_struct, mode="constant", cval=1)
+    black_con = ndimage.convolve(state[BLACK_CHAN], surround_struct, mode="constant", cval=1)
+    white_con = ndimage.convolve(state[WHITE_CHAN], surround_struct, mode="constant", cval=1)
+
+    surrounded = all_pieces_con == 4
     invalid_moves = (
         all_pieces + possible_invalid_array * (definite_valids_array == 0) * surrounded
     )
 
-    example_board = ndimage.convolve(
-        np.ones(state.shape[1:]), surround_struct, mode="constant"
-    )
-    black_surrounded = (
-        ndimage.convolve(state[BLACK_CHAN], surround_struct, mode="constant")
-        == example_board
-    )
-    white_surrounded = (
-        ndimage.convolve(state[WHITE_CHAN], surround_struct, mode="constant")
-        == example_board
-    )
+    black_surrounded = black_con == 4
+    white_surrounded = white_con == 4
+    invalid_moves += black_surrounded
+    invalid_moves += white_surrounded
 
     if ko_protect is not None:
         invalid_moves[ko_protect[0], ko_protect[1]] = 1
@@ -106,8 +104,6 @@ def compute_valid_moves(state, player, ko_protect=None):
         all_pieces.dtype
     )
     invalid_moves += 1 - valid_points + all_pieces
-    invalid_moves += black_surrounded
-    invalid_moves += white_surrounded
     return 1 - (invalid_moves > 0)
 
 
@@ -118,7 +114,7 @@ def valid_moves(state):
 
 
 def turn(state):
-    return int(np.max(state[TURN_CHAN]))
+    return int(state[TURN_CHAN][0, 0])
 
 
 def if_win(state):

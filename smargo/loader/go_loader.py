@@ -20,5 +20,5 @@ def go_board_init(board_path):
     state[WHITE_CHAN][np.where(board == 1)] = 1
     state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
     state[TURN_CHAN] = board_info["turn"]
-    state[VALID_CHAN] = compute_valid_moves(state, 1 - board_info["turn"])
+    state[VALID_CHAN] = compute_valid_moves(state, board_info["turn"])
     return state

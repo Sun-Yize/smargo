@@ -10,7 +10,8 @@ def _plot_board(
     moves: List, 
     turn: int, 
     board_size: int,
-    save_path: str):
+    save_path: str
+) -> None:
     fig = plt.figure(figsize=[8,8])
     fig.patch.set_facecolor((1,1,.8))
     ax = fig.add_subplot(111)
@@ -44,7 +45,7 @@ def _plot_board(
         ax.plot(move[1], board_size-move[0]-1,'o',markersize=50, markeredgecolor=colorset[0], markerfacecolor=colorset[1], markeredgewidth=2)
         plt.savefig(save_path+'step'+str(idx+1)+'.png')
 
-def plot_go_file(file_path: str):
+def plot_go_file(file_path: str) -> None:
     board_info = json.load(open(file_path))
     dir_name = 'data/'+file_path.strip('.json').split('/')[-1]+'/'
     if os.path.exists(dir_name):

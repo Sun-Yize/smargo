@@ -64,13 +64,15 @@ class MCTS:
             depth += 1
             action, node = node.select(self.c_puct)
             next_state(simulate_game_state, action)
-        if depth < self.total_play and not if_end(simulate_game_state):
+        if if_win(simulate_game_state):
+            leaf_value = 5.0 if turn(simulate_game_state) == 1 else -5.0
+        elif depth < self.total_play and not if_end(simulate_game_state):
             availables = valid_moves(simulate_game_state)
             action_probs = np.ones(len(availables)) / len(availables)
             node.expand(zip(availables, action_probs))
             leaf_value = self.evaluate_rollout(simulate_game_state, depth=depth)
         else:
-            leaf_value = 1.0 if turn(simulate_game_state) == 0 else -1.0
+            leaf_value = 0
         node.update_recursive(leaf_value)
 
     def get_move(self, game):
@@ -97,7 +99,7 @@ class MCTS:
         for _ in range(self.total_play - depth):
             winner = if_win(game_state_copy)
             if winner:
-                return 1.0 if player == 1 else -1.0
+                return 5.0 if player == 1 else -5.0
             if if_end(game_state_copy):
                 return 1.0 if player == 0 else -1.0
             depth += 1
@@ -105,19 +107,27 @@ class MCTS:
             max_action = max(action_probs, key=itemgetter(1))[0]
             next_state(game_state_copy, max_action)
         else:
-            return 1.0 if player == 0 else -1.0
+            return 0
 
-    def update_with_move(self, state, num):
+    def result_moves(self, num):
         move_list = []
-        for _ in range(num):
-            if self.root.children != {}:
-                move = max(
-                    self.root.children.items(),
-                    key=lambda act_node: act_node[1].n_visits,
-                )[0]
-                move_list.append(move)
-                self.root = self.root.children[move]
-                self.root.parent = None
-            else:
-                break
+        while self.root.children != {}:
+            move = max(
+                self.root.children.items(),
+                key=lambda act_node: act_node[1].n_visits,
+            )[0]
+            move_list.append(move)
+            self.root = self.root.children[move]
+            self.root.parent = None
+        # for _ in range(num):
+        #     if self.root.children != {}:
+        #         move = max(
+        #             self.root.children.items(),
+        #             key=lambda act_node: act_node[1].n_visits,
+        #         )[0]
+        #         move_list.append(move)
+        #         self.root = self.root.children[move]
+        #         self.root.parent = None
+        #     else:
+        #         break
         return move_list

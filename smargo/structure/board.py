@@ -53,6 +53,7 @@ def adj_data(state, action2d, player):
     return neighbors, surrounded
 
 
+# return: valid 1 invalid 0
 def compute_valid_moves(state, player, ko_protect=None):
     all_pieces = np.sum(state[[BLACK_CHAN, WHITE_CHAN]], axis=0)
     empties = 1 - all_pieces
@@ -84,6 +85,11 @@ def compute_valid_moves(state, player, ko_protect=None):
     invalid_moves = (
         all_pieces + possible_invalid_array * (definite_valids_array == 0) * surrounded
     )
+
+    example_board = ndimage.convolve(np.ones(state.shape[1:]), surround_struct, mode='constant')
+    black_surrounded = ndimage.convolve(state[BLACK_CHAN], surround_struct, mode='constant') == example_board
+    white_surrounded = ndimage.convolve(state[WHITE_CHAN], surround_struct, mode='constant') == example_board
+
     if ko_protect is not None:
         invalid_moves[ko_protect[0], ko_protect[1]] = 1
     all_pieces = np.sum(state[[BLACK_CHAN, WHITE_CHAN]], axis=0)
@@ -91,6 +97,8 @@ def compute_valid_moves(state, player, ko_protect=None):
         all_pieces.dtype
     )
     invalid_moves += 1 - valid_points + all_pieces
+    invalid_moves += black_surrounded
+    invalid_moves += white_surrounded
     return 1 - (invalid_moves > 0)
 
 

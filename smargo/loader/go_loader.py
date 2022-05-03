@@ -1,7 +1,9 @@
-from ..structure.constant import *
-from ..structure.board import compute_valid_moves
-import numpy as np
 import json
+
+import numpy as np
+
+from ..structure.board import compute_valid_moves
+from ..structure.constant import *
 
 
 def go_board_init(board_path):

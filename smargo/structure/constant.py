@@ -1,5 +1,4 @@
-import numpy  as np
-
+import numpy as np
 
 CHAN = 6
 BLACK_CHAN = 0

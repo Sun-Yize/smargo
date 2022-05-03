@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from scipy.ndimage import measurements
+
 from .constant import *
 
 
@@ -86,9 +87,17 @@ def compute_valid_moves(state, player, ko_protect=None):
         all_pieces + possible_invalid_array * (definite_valids_array == 0) * surrounded
     )
 
-    example_board = ndimage.convolve(np.ones(state.shape[1:]), surround_struct, mode='constant')
-    black_surrounded = ndimage.convolve(state[BLACK_CHAN], surround_struct, mode='constant') == example_board
-    white_surrounded = ndimage.convolve(state[WHITE_CHAN], surround_struct, mode='constant') == example_board
+    example_board = ndimage.convolve(
+        np.ones(state.shape[1:]), surround_struct, mode="constant"
+    )
+    black_surrounded = (
+        ndimage.convolve(state[BLACK_CHAN], surround_struct, mode="constant")
+        == example_board
+    )
+    white_surrounded = (
+        ndimage.convolve(state[WHITE_CHAN], surround_struct, mode="constant")
+        == example_board
+    )
 
     if ko_protect is not None:
         invalid_moves[ko_protect[0], ko_protect[1]] = 1

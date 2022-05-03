@@ -1,6 +1,9 @@
-import numpy as np
 import copy
 from operator import itemgetter
+
+import numpy as np
+from tqdm import tqdm
+
 from ..structure.board import *
 
 
@@ -44,11 +47,10 @@ class TreeNode:
 
 
 class MCTS:
-    def __init__(self, c_puct=5, n_playout=10000, total_play=20):
+    def __init__(self, c_puct=5, n_playout=10000):
         self.root = TreeNode(None, 1.0)
         self.c_puct = c_puct
         self.n_playout = n_playout
-        self.total_play = total_play
 
     def policy_value_fn(self, game_state_simulator):
         availables = valid_moves(game_state_simulator)
@@ -76,12 +78,10 @@ class MCTS:
         node.update_recursive(leaf_value)
 
     def get_move(self, game):
-        for i in range(self.n_playout):
+        self.total_play = np.prod(game.shape[1:])
+        for _ in tqdm(range(self.n_playout), desc=f"Training Monte Carlo Trees: "):
             game_state = copy.deepcopy(game)
             self.playout(game_state)
-        print(
-            max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits)
-        )
         return max(
             self.root.children.items(), key=lambda act_node: act_node[1].n_visits
         )[0]
@@ -109,7 +109,7 @@ class MCTS:
         else:
             return 0
 
-    def result_moves(self, num):
+    def result_moves(self):
         move_list = []
         while self.root.children != {}:
             move = max(
@@ -119,15 +119,4 @@ class MCTS:
             move_list.append(move)
             self.root = self.root.children[move]
             self.root.parent = None
-        # for _ in range(num):
-        #     if self.root.children != {}:
-        #         move = max(
-        #             self.root.children.items(),
-        #             key=lambda act_node: act_node[1].n_visits,
-        #         )[0]
-        #         move_list.append(move)
-        #         self.root = self.root.children[move]
-        #         self.root.parent = None
-        #     else:
-        #         break
         return move_list

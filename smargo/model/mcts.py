@@ -14,6 +14,7 @@ class TreeNode:
         self.n_visits = 0
         self.Q = 0
         self.U = 0
+        self.value = 0
         self.P = prior_p
 
     def select(self, c_puct):
@@ -27,6 +28,7 @@ class TreeNode:
                 self.children[action] = TreeNode(self, prob)
 
     def update(self, leaf_value):
+        self.value += leaf_value
         self.n_visits += 1
         self.Q += 1.0 * (leaf_value - self.Q) / self.n_visits
 

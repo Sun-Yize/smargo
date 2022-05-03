@@ -1,10 +1,13 @@
+import json
 import os
 import shutil
 from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
+from PIL import Image
 
+from ..loader import go_board_init
 from ..structure.board import next_state
 from ..structure.constant import *
 
@@ -68,8 +71,33 @@ def _plot_go_figure(board_size, black_list, white_list, save_path):
     plt.savefig(save_path)
 
 
-def plot_go_state(state: np.array, moves: List) -> None:
+def plot_go_board(state: np.array, moves: List, generate_gif: bool = True) -> None:
     dir_name = "data/current_state/"
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)
+    else:
+        shutil.rmtree(dir_name)
+        os.mkdir(dir_name)
+    _plot_board_state(state, moves, dir_name)
+    if generate_gif:
+        imgs = (Image.open(dir_name + f) for f in sorted(os.listdir(dir_name)))
+        img = next(imgs)  # extract first image from iterator
+        img.save(
+            fp=dir_name + "result.gif",
+            format="GIF",
+            append_images=imgs,
+            save_all=True,
+            duration=700,
+            loop=0,
+        )
+
+
+def plot_go_file(file_path: str) -> None:
+    board_info = json.load(open(file_path))
+    board_size = board_info["board_size"]
+    moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
+    state = go_board_init(file_path)
+    dir_name = "data/" + file_path.strip(".json").split("/")[-1] + "/"
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     else:

@@ -9,6 +9,7 @@ RESULT_CHAN = 4
 ORIGIN_WHITE_CHAN = 5
 
 surround_struct = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
+surround_struct_corner = np.array([[1, 0, 1], [0, 0, 0], [1, 0, 1]])
 neighbor_deltas = np.array([[-1, 0], [1, 0], [0, -1], [0, 1]])
 valid_surround = np.array(
     [

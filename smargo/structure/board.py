@@ -84,27 +84,45 @@ def compute_valid_moves(state, player, ko_protect=None):
     definite_valids_array += np.sum(all_opp_liberties[opp_liberty_counts == 1], axis=0)
 
     all_pieces_con = ndimage.convolve(all_pieces, surround_struct, mode="constant", cval=1)
-    black_con = ndimage.convolve(state[BLACK_CHAN], surround_struct, mode="constant", cval=1)
-    white_con = ndimage.convolve(state[WHITE_CHAN], surround_struct, mode="constant", cval=1)
+    own_con = ndimage.convolve(state[player], surround_struct, mode="constant", cval=1)
+    opp_con = ndimage.convolve(state[1-player], surround_struct, mode="constant", cval=1)
+    own_con_corner = ndimage.convolve(state[player], surround_struct_corner, mode="constant", cval=1)
 
     surrounded = all_pieces_con == 4
     invalid_moves = (
         all_pieces + possible_invalid_array * (definite_valids_array == 0) * surrounded
     )
 
-    black_surrounded = black_con == 4
-    white_surrounded = white_con == 4
-    invalid_moves += black_surrounded
-    invalid_moves += white_surrounded
+    own_surrounded = own_con == 4
+    opp_surrounded = opp_con == 4
+    invalid_moves += own_surrounded
+    invalid_moves += opp_surrounded
 
+    possible_valid_array = np.logical_and(own_con_corner >= 2, np.logical_and(empties, opp_surrounded).astype(int)).astype(int)
+    
+    for point in zip(*np.where(possible_valid_array == 1)):
+        flag = True
+        empties_now = np.copy(empties)
+        empties_now[point] = 0
+        adj_locs, _ = adj_data(state, point, player)
+        all_adj_labels = all_opp_groups[adj_locs[:, 0], adj_locs[:, 1]]
+        all_adj_labels = np.unique(all_adj_labels)
+        for opp_group_idx in all_adj_labels[np.nonzero(all_adj_labels)]:
+            opp_group = all_opp_groups == opp_group_idx
+            liberties = empties_now * ndimage.binary_dilation(opp_group)
+            if np.sum(liberties) <= 0:
+                flag = False
+                break
+        if flag:
+            possible_valid_array[point] = 0
     if ko_protect is not None:
         invalid_moves[ko_protect[0], ko_protect[1]] = 1
-    all_pieces = np.sum(state[[BLACK_CHAN, WHITE_CHAN]], axis=0)
     valid_points = ndimage.binary_dilation(all_pieces, structure=valid_surround).astype(
         all_pieces.dtype
     )
     invalid_moves += 1 - valid_points + all_pieces
-    return 1 - (invalid_moves > 0)
+    total_valid = np.logical_or(1 - (invalid_moves > 0), possible_valid_array).astype(int)
+    return total_valid
 
 
 def valid_moves(state):

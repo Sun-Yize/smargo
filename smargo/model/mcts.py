@@ -69,7 +69,7 @@ class MCTS:
             action, node = node.select(self.c_puct)
             next_state(simulate_game_state, action)
         if if_win(simulate_game_state):
-            leaf_value = 5.0 if turn(simulate_game_state) == 1 else -5.0
+            leaf_value = 1.0 if turn(simulate_game_state) == 1 else  -1.0
         elif depth < self.total_play and not if_end(simulate_game_state):
             availables = valid_moves(simulate_game_state)
             action_probs = np.ones(len(availables)) / len(availables)
@@ -101,7 +101,7 @@ class MCTS:
         for _ in range(self.total_play - depth):
             winner = if_win(game_state_copy)
             if winner:
-                return 5.0 if player == 1 else -5.0
+                return 1.0 if player == 1 else -1.0
             if if_end(game_state_copy):
                 return 1.0 if player == 0 else -1.0
             depth += 1

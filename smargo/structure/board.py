@@ -83,10 +83,16 @@ def compute_valid_moves(state, player, ko_protect=None):
     definite_valids_array += np.sum(all_own_liberties[own_liberty_counts > 1], axis=0)
     definite_valids_array += np.sum(all_opp_liberties[opp_liberty_counts == 1], axis=0)
 
-    all_pieces_con = ndimage.convolve(all_pieces, surround_struct, mode="constant", cval=1)
+    all_pieces_con = ndimage.convolve(
+        all_pieces, surround_struct, mode="constant", cval=1
+    )
     own_con = ndimage.convolve(state[player], surround_struct, mode="constant", cval=1)
-    opp_con = ndimage.convolve(state[1-player], surround_struct, mode="constant", cval=1)
-    own_con_corner = ndimage.convolve(state[player], surround_struct_corner, mode="constant", cval=1)
+    opp_con = ndimage.convolve(
+        state[1 - player], surround_struct, mode="constant", cval=1
+    )
+    own_con_corner = ndimage.convolve(
+        state[player], surround_struct_corner, mode="constant", cval=1
+    )
 
     surrounded = all_pieces_con == 4
     invalid_moves = (
@@ -98,8 +104,10 @@ def compute_valid_moves(state, player, ko_protect=None):
     invalid_moves += own_surrounded
     invalid_moves += opp_surrounded
 
-    possible_valid_array = np.logical_and(own_con_corner >= 2, np.logical_and(empties, opp_surrounded).astype(int)).astype(int)
-    
+    possible_valid_array = np.logical_and(
+        own_con_corner >= 2, np.logical_and(empties, opp_surrounded).astype(int)
+    ).astype(int)
+
     for point in zip(*np.where(possible_valid_array == 1)):
         flag = True
         empties_now = np.copy(empties)
@@ -121,7 +129,9 @@ def compute_valid_moves(state, player, ko_protect=None):
         all_pieces.dtype
     )
     invalid_moves += 1 - valid_points + all_pieces
-    total_valid = np.logical_or(1 - (invalid_moves > 0), possible_valid_array).astype(int)
+    total_valid = np.logical_or(1 - (invalid_moves > 0), possible_valid_array).astype(
+        int
+    )
     return total_valid
 
 
@@ -147,8 +157,11 @@ def if_win(state):
         expanded_own_groups[idx] = all_own_groups == num
     expanded_own_groups = np.sum(expanded_own_groups, axis=0)
 
-    all_eyes = ndimage.convolve(expanded_own_groups, surround_struct, mode="constant", cval=1) == 4
-    index_eyes = np.where(all_eyes*empties == 1)
+    all_eyes = (
+        ndimage.convolve(expanded_own_groups, surround_struct, mode="constant", cval=1)
+        == 4
+    )
+    index_eyes = np.where(all_eyes * empties == 1)
     if len(index_eyes[0]) > 1:
         index_eyes = list(zip(*index_eyes))
         count = 0
@@ -161,14 +174,16 @@ def if_win(state):
             neighbors = neighbors[np.nonzero(valid)]
             corner_sum = 8 - len(neighbors)
             white_sum = np.sum([state[WHITE_CHAN, nei[0], nei[1]] for nei in neighbors])
-            eyes_sum = np.sum([1 if (nei[0], nei[1]) in index_eyes else 0 for nei in neighbors])
+            eyes_sum = np.sum(
+                [1 if (nei[0], nei[1]) in index_eyes else 0 for nei in neighbors]
+            )
             total_num = corner_sum + white_sum + eyes_sum
             if total_num >= 7:
                 count += 1
         #         if (total_num == 7 and eyes_sum == 0) or (total_num == 8 and eyes_sum <= 1):
         #             count += 1
         #             valid_eyes.append(eye)
-        #         else: 
+        #         else:
         #             eye_list = []
         #             for nei in neighbors:
         #                 if (nei[0], nei[1]) in index_eyes:
@@ -183,7 +198,7 @@ def if_win(state):
         #         count += 1
         if count >= 2:
             return 1
-    
+
     result = state[ORIGIN_WHITE_CHAN] * state[WHITE_CHAN]
     if np.sum(result) != np.sum(state[ORIGIN_WHITE_CHAN]):
         return 0

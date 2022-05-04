@@ -6,7 +6,7 @@ from ..structure.board import compute_valid_moves
 from ..structure.constant import *
 
 
-def go_board_init(board_path):
+def go_board_init(board_path: str) -> np.array:
     board_info = json.load(open(board_path))
     board = np.array(board_info["state"])
     state = np.zeros(

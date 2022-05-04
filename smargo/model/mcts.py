@@ -44,13 +44,11 @@ class TreeNode:
     def is_leaf(self):
         return self.children == {}
 
-    def is_root(self):
-        return self.parent is None
-
 
 class MCTS:
     def __init__(self, c_puct=5, n_playout=10000):
         self.root = TreeNode(None, 1.0)
+        self.root_total = self.root
         self.c_puct = c_puct
         self.n_playout = n_playout
 
@@ -70,7 +68,7 @@ class MCTS:
             next_state(simulate_game_state, action)
         winner = if_win(simulate_game_state)
         if winner is not False:
-            leaf_value = 1.0 if turn(simulate_game_state) == winner else  -1.0
+            leaf_value = 1.0 if turn(simulate_game_state) == winner else -1.0
         elif depth < self.total_play and not if_end(simulate_game_state):
             availables = valid_moves(simulate_game_state)
             action_probs = np.ones(len(availables)) / len(availables)

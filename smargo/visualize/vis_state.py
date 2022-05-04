@@ -42,3 +42,4 @@ def plot_go_state(state: np.array, save_path: str = None) -> None:
         plt.savefig(save_path)
     else:
         plt.show()
+    plt.close()

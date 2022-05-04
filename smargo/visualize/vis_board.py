@@ -93,12 +93,14 @@ def plot_go_board(state: np.array, moves: List, generate_gif: bool = True) -> No
         )
 
 
-def plot_go_file(file_path: str, generate_gif: bool = True) -> None:
+def plot_go_file(
+    file_path: str, export_path: str = None, generate_gif: bool = True
+) -> None:
     board_info = json.load(open(file_path))
     board_size = board_info["board_size"]
     moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
     state = go_board_init(file_path)
-    dir_name = file_path.strip(".json") + "/"
+    dir_name = export_path if export_path else file_path.strip(".json") + "/"
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     else:

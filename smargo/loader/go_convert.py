@@ -5,9 +5,47 @@ import shutil
 from typing import Dict, Union
 
 import numpy as np
+from _ctypes import PyObj_FromPtr
 
 from ..structure.board import compute_valid_moves, next_state
 from ..structure.constant import *
+
+
+class NoIndent(object):
+    def __init__(self, value):
+        if not isinstance(value, (list, tuple)):
+            raise TypeError("Only lists and tuples can be wrapped")
+        self.value = value
+
+
+class MyEncoder(json.JSONEncoder):
+    FORMAT_SPEC = "@@{}@@"
+    regex = re.compile(FORMAT_SPEC.format(r"(\d+)"))
+
+    def __init__(self, **kwargs):
+        ignore = {"cls", "indent"}
+        self._kwargs = {k: v for k, v in kwargs.items() if k not in ignore}
+        super(MyEncoder, self).__init__(**kwargs)
+
+    def default(self, obj):
+        return (
+            self.FORMAT_SPEC.format(id(obj))
+            if isinstance(obj, NoIndent)
+            else super(MyEncoder, self).default(obj)
+        )
+
+    def iterencode(self, obj, **kwargs):
+        format_spec = self.FORMAT_SPEC
+        for encoded in super(MyEncoder, self).iterencode(obj, **kwargs):
+            match = self.regex.search(encoded)
+            if match:
+                id = int(match.group(1))
+                no_indent = PyObj_FromPtr(id)
+                json_repr = json.dumps(no_indent.value, **self._kwargs)
+                encoded = encoded.replace(
+                    '"{}"'.format(format_spec.format(id)), json_repr
+                )
+            yield encoded
 
 
 def load_sgf(file_path: str) -> Dict:
@@ -35,6 +73,30 @@ def load_sgf(file_path: str) -> Dict:
     board_info["state"] = board_info["state"].tolist()
     board_info["source"] = file_path
     return board_info
+
+
+def _test_valid(board_info):
+    board_size = board_info["board_size"]
+    moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
+    board = np.array(board_info["state"])
+    state = np.zeros(
+        (
+            CHAN,
+            board_info["board_size"][0],
+            board_info["board_size"][1],
+        )
+    )
+    state[BLACK_CHAN][np.where(board == 0)] = 1
+    state[WHITE_CHAN][np.where(board == 1)] = 1
+    state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
+    state[TURN_CHAN] = board_info["turn"]
+    state[VALID_CHAN] = compute_valid_moves(state, board_info["turn"])
+    try:
+        for move in moves:
+            next_state(state, move)
+        return True
+    except:
+        return False
 
 
 def _load_sgf_str(sgf_info: str):
@@ -112,15 +174,16 @@ def _board_rotate(indexs: Dict, turn: int) -> Union[Dict, int]:
 
 
 def dump_json(board_info, dump_path) -> None:
+    board_info["state"] = [NoIndent(elem) for elem in board_info["state"]]
+    board_info["ground_truth"] = [NoIndent(elem) for elem in board_info["ground_truth"]]
     with open(dump_path, "w") as f:
-        json.dump(board_info, f)
+        json.dump(board_info, f, cls=MyEncoder, sort_keys=True, indent=4)
 
 
 def convert_go_sgf(
     folder_name: str,
     dump_floder_name: str,
 ) -> None:
-    sgf_files = os.listdir(folder_name)
     max_num = 0
 
     json_fold = os.path.join(dump_floder_name, "json")
@@ -146,27 +209,3 @@ def convert_go_sgf(
                     max_num += 1
             except:
                 print(file_path + " load err!")
-
-
-def _test_valid(board_info):
-    board_size = board_info["board_size"]
-    moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
-    board = np.array(board_info["state"])
-    state = np.zeros(
-        (
-            CHAN,
-            board_info["board_size"][0],
-            board_info["board_size"][1],
-        )
-    )
-    state[BLACK_CHAN][np.where(board == 0)] = 1
-    state[WHITE_CHAN][np.where(board == 1)] = 1
-    state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
-    state[TURN_CHAN] = board_info["turn"]
-    state[VALID_CHAN] = compute_valid_moves(state, board_info["turn"])
-    try:
-        for move in moves:
-            next_state(state, move)
-        return True
-    except:
-        return False

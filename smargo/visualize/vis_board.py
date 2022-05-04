@@ -20,7 +20,7 @@ def _plot_board_state(state: List, moves: List, save_path: str) -> None:
         black_list.append([init_point[1], board_size - init_point[0] - 1])
     for init_point in zip(*np.where(state[WHITE_CHAN] == 1)):
         white_list.append([init_point[1], board_size - init_point[0] - 1])
-    _plot_go_figure(board_size, black_list, white_list, save_path + "original.png")
+    _plot_go_figure(board_size, black_list, white_list, os.path.join(save_path, "original.png"))
 
     for idx, move in enumerate(moves):
         next_state(state, move)
@@ -33,7 +33,7 @@ def _plot_board_state(state: List, moves: List, save_path: str) -> None:
             board_size,
             black_list,
             white_list,
-            save_path + "step" + str(idx + 1).zfill(2) + ".png",
+            os.path.join(save_path, "step" + str(idx + 1).zfill(2) + ".png"),
         )
 
 
@@ -72,8 +72,8 @@ def _plot_go_figure(board_size, black_list, white_list, save_path):
     plt.close()
 
 
-def plot_go_board(state: np.array, moves: List, generate_gif: bool = True) -> None:
-    dir_name = "data/current_state/"
+def plot_go_board(state: np.array, moves: List, export_path: str = "data/current_state/", generate_gif: bool = True) -> None:
+    dir_name = export_path
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     else:
@@ -81,10 +81,10 @@ def plot_go_board(state: np.array, moves: List, generate_gif: bool = True) -> No
         os.mkdir(dir_name)
     _plot_board_state(state, moves, dir_name)
     if generate_gif:
-        imgs = (Image.open(dir_name + f) for f in sorted(os.listdir(dir_name)))
+        imgs = (Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name)))
         img = next(imgs)  # extract first image from iterator
         img.save(
-            fp=dir_name + "result.gif",
+            fp=os.path.join(dir_name, "result.gif"),
             format="GIF",
             append_images=imgs,
             save_all=True,
@@ -109,10 +109,10 @@ def plot_go_file(
     try:
         _plot_board_state(state, moves, dir_name)
         if generate_gif:
-            imgs = (Image.open(dir_name + f) for f in sorted(os.listdir(dir_name)))
-            img = next(imgs)  # extract first image from iterator
+            imgs = (Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name)))
+            img = next(imgs)
             img.save(
-                fp=dir_name + "result.gif",
+                fp=os.path.join(dir_name, "result.gif"),
                 format="GIF",
                 append_images=imgs,
                 save_all=True,

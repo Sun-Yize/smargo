@@ -46,11 +46,11 @@ class TreeNode:
 
 
 class MCTS:
-    def __init__(self, c_puct=5, n_playout=10000):
+    def __init__(self, c_puct=5):
         self.root = TreeNode(None, 1.0)
         self.root_total = self.root
         self.c_puct = c_puct
-        self.n_playout = n_playout
+        self.depth = 0
 
     def policy_value_fn(self, game_state_simulator):
         availables = valid_moves(game_state_simulator)
@@ -59,7 +59,7 @@ class MCTS:
 
     def playout(self, simulate_game_state):
         node = self.root
-        depth = 0
+        depth = self.depth
         while True:
             if node.is_leaf():
                 break
@@ -78,7 +78,8 @@ class MCTS:
             leaf_value = 0
         node.update_recursive(-leaf_value)
 
-    def get_move(self, game):
+    def get_move(self, game, n_playout=10000):
+        self.n_playout = n_playout
         self.total_play = np.prod(game.shape[1:])
         for _ in tqdm(range(self.n_playout), desc=f"Training Monte Carlo Trees: "):
             game_state = copy.deepcopy(game)
@@ -110,9 +111,50 @@ class MCTS:
         else:
             return 0
 
+    def train(self, game_init, init_playout=500, iter_playout=100):
+        self.depth = 0
+        game = copy.deepcopy(game_init)
+        self.total_play = np.prod(game.shape[1:])
+        self.init_playout = init_playout
+        for _ in tqdm(range(self.init_playout), desc=f"Training Monte Carlo Trees: "):
+            game_state = copy.deepcopy(game)
+            self.playout(game_state)
+        while not self.root.is_leaf():
+            self._train_iter(game, iter_playout)
+            move = max(
+                self.root.children.items(),
+                key=lambda act_node: act_node[1].n_visits,
+            )[0]
+            print('current move is:', move)
+            print([{x[0]: x[1].n_visits} for x in self.root.children.items()])
+            print([{x[0]: x[1].value} for x in self.root.children.items()])
+            self.root = self.root.children[move]
+            self.depth += 1
+            next_state(game, move)
+        self.root = self.root_total
+
+
+    def _train_iter(self, game, iter_playout):
+        count_num = 0
+        temp  = max(
+            self.root.children.items(),
+            key=lambda act_node: act_node[1].n_visits,
+        )[0]
+        while count_num < iter_playout:
+            game_state = copy.deepcopy(game)
+            self.playout(game_state)
+            move = max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits)[0]
+            if move != temp:
+                temp = move
+                count_num = 0
+            else:
+                count_num += 1
+
+
     def result_moves(self):
         move_list = []
-        while self.root.children != {}:
+        self.root = self.root_total
+        while not self.root.is_leaf():
             move = max(
                 self.root.children.items(),
                 key=lambda act_node: act_node[1].n_visits,

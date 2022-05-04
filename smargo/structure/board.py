@@ -180,28 +180,15 @@ def if_win(state):
             total_num = corner_sum + white_sum + eyes_sum
             if total_num >= 7:
                 count += 1
-        #         if (total_num == 7 and eyes_sum == 0) or (total_num == 8 and eyes_sum <= 1):
-        #             count += 1
-        #             valid_eyes.append(eye)
-        #         else:
-        #             eye_list = []
-        #             for nei in neighbors:
-        #                 if (nei[0], nei[1]) in index_eyes:
-        #                     eye_list.append((nei[0], nei[1]))
-        #             match_eyes[eye] = eye_list
-        # for i1 in match_eyes.items():
-        #     flag = True
-        #     for i2 in i1[1]:
-        #         if (i2 not in match_eyes) and (i2 not in valid_eyes):
-        #             flag = False
-        #     if flag:
-        #         count += 1
         if count >= 2:
             return 1
 
-    result = state[ORIGIN_WHITE_CHAN] * state[WHITE_CHAN]
-    if np.sum(result) != np.sum(state[ORIGIN_WHITE_CHAN]):
+    result1 = state[ORIGIN_WHITE_CHAN] * state[WHITE_CHAN]
+    if np.sum(result1) != np.sum(state[ORIGIN_WHITE_CHAN]):
         return 0
+    result2 = state[ORIGIN_BLACK_CHAN] * state[BLACK_CHAN]
+    if np.sum(result2) != np.sum(state[ORIGIN_BLACK_CHAN]):
+        return 1
     return False
 
 

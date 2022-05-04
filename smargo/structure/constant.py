@@ -1,12 +1,13 @@
 import numpy as np
 
-CHAN = 6
+CHAN = 7
 BLACK_CHAN = 0
 WHITE_CHAN = 1
 TURN_CHAN = 2
 VALID_CHAN = 3
 RESULT_CHAN = 4
 ORIGIN_WHITE_CHAN = 5
+ORIGIN_BLACK_CHAN = 6
 
 surround_struct = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
 surround_struct_corner = np.array([[1, 0, 1], [0, 0, 0], [1, 0, 1]])

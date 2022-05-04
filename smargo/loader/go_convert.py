@@ -89,6 +89,7 @@ def _test_valid(board_info):
     state[BLACK_CHAN][np.where(board == 0)] = 1
     state[WHITE_CHAN][np.where(board == 1)] = 1
     state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
+    state[ORIGIN_BLACK_CHAN] = state[BLACK_CHAN]
     state[TURN_CHAN] = board_info["turn"]
     state[VALID_CHAN] = compute_valid_moves(state, board_info["turn"])
     try:
@@ -176,6 +177,8 @@ def _board_rotate(indexs: Dict, turn: int) -> Union[Dict, int]:
 def dump_json(board_info, dump_path) -> None:
     board_info["state"] = [NoIndent(elem) for elem in board_info["state"]]
     board_info["ground_truth"] = [NoIndent(elem) for elem in board_info["ground_truth"]]
+    if "predict" in board_info:
+        board_info["predict"] = [NoIndent(elem) for elem in board_info["predict"]]
     with open(dump_path, "w") as f:
         json.dump(board_info, f, cls=MyEncoder, sort_keys=True, indent=4)
 

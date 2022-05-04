@@ -68,8 +68,9 @@ class MCTS:
             depth += 1
             action, node = node.select(self.c_puct)
             next_state(simulate_game_state, action)
-        if if_win(simulate_game_state):
-            leaf_value = 1.0 if turn(simulate_game_state) == 1 else  -1.0
+        winner = if_win(simulate_game_state)
+        if winner is not False:
+            leaf_value = 1.0 if turn(simulate_game_state) == winner else  -1.0
         elif depth < self.total_play and not if_end(simulate_game_state):
             availables = valid_moves(simulate_game_state)
             action_probs = np.ones(len(availables)) / len(availables)
@@ -77,7 +78,7 @@ class MCTS:
             leaf_value = self.evaluate_rollout(simulate_game_state, depth=depth)
         else:
             leaf_value = 0
-        node.update_recursive(leaf_value)
+        node.update_recursive(-leaf_value)
 
     def get_move(self, game):
         self.total_play = np.prod(game.shape[1:])
@@ -100,10 +101,10 @@ class MCTS:
         player = turn(game_state_copy)
         for _ in range(self.total_play - depth):
             winner = if_win(game_state_copy)
-            if winner:
-                return 1.0 if player == 1 else -1.0
+            if winner is not False:
+                return 1.0 if player == winner else -1.0
             if if_end(game_state_copy):
-                return 1.0 if player == 0 else -1.0
+                return 0
             depth += 1
             action_probs = self.policy_value_fn(game_state_copy)
             max_action = max(action_probs, key=itemgetter(1))[0]

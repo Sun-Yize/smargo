@@ -136,8 +136,58 @@ def turn(state):
 
 
 def if_win(state):
+    all_pieces = np.sum(state[[BLACK_CHAN, WHITE_CHAN]], axis=0)
+    empties = 1 - all_pieces
+    all_own_groups, _ = measurements.label(state[WHITE_CHAN])
+    adj_locs = np.where(state[ORIGIN_WHITE_CHAN] == 1)
+    all_adj_labels = all_own_groups[adj_locs]
+    all_adj_labels = np.unique(all_adj_labels)
+    expanded_own_groups = np.zeros((len(all_adj_labels), *state.shape[1:]))
+    for idx, num in enumerate(all_adj_labels):
+        expanded_own_groups[idx] = all_own_groups == num
+    expanded_own_groups = np.sum(expanded_own_groups, axis=0)
+
+    all_eyes = ndimage.convolve(expanded_own_groups, surround_struct, mode="constant", cval=1) == 4
+    index_eyes = np.where(all_eyes*empties == 1)
+    if len(index_eyes[0]) > 1:
+        index_eyes = list(zip(*index_eyes))
+        count = 0
+        # match_eyes = {}
+        # valid_eyes = []
+        for eye in index_eyes:
+            neighbors = neighbor_corner + eye
+            valid = (neighbors >= 0) & (neighbors < state.shape[1])
+            valid = np.prod(valid, axis=1)
+            neighbors = neighbors[np.nonzero(valid)]
+            corner_sum = 8 - len(neighbors)
+            white_sum = np.sum([state[WHITE_CHAN, nei[0], nei[1]] for nei in neighbors])
+            eyes_sum = np.sum([1 if (nei[0], nei[1]) in index_eyes else 0 for nei in neighbors])
+            total_num = corner_sum + white_sum + eyes_sum
+            if total_num >= 7:
+                count += 1
+        #         if (total_num == 7 and eyes_sum == 0) or (total_num == 8 and eyes_sum <= 1):
+        #             count += 1
+        #             valid_eyes.append(eye)
+        #         else: 
+        #             eye_list = []
+        #             for nei in neighbors:
+        #                 if (nei[0], nei[1]) in index_eyes:
+        #                     eye_list.append((nei[0], nei[1]))
+        #             match_eyes[eye] = eye_list
+        # for i1 in match_eyes.items():
+        #     flag = True
+        #     for i2 in i1[1]:
+        #         if (i2 not in match_eyes) and (i2 not in valid_eyes):
+        #             flag = False
+        #     if flag:
+        #         count += 1
+        if count >= 2:
+            return 1
+    
     result = state[ORIGIN_WHITE_CHAN] * state[WHITE_CHAN]
-    return True if np.sum(result) != np.sum(state[ORIGIN_WHITE_CHAN]) else False
+    if np.sum(result) != np.sum(state[ORIGIN_WHITE_CHAN]):
+        return 0
+    return False
 
 
 def if_end(state):

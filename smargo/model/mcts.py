@@ -111,21 +111,37 @@ class MCTS:
         else:
             return 0
 
-    def train(self, game_init, init_playout=500, iter_playout=100):
+    def train(self, game_init, init_playout=500, num_moves=None):
         self.depth = 0
         game = copy.deepcopy(game_init)
+
         self.total_play = np.prod(game.shape[1:])
         self.init_playout = init_playout
-        for _ in tqdm(range(self.init_playout), desc=f"Training Monte Carlo Trees: "):
-            game_state = copy.deepcopy(game)
-            self.playout(game_state)
-        while not self.root.is_leaf():
-            self._train_iter(game, iter_playout)
+
+        game_state = copy.deepcopy(game)
+        self.playout(game_state)
+
+        while True:
+            if num_moves:
+                if num_moves == self.depth:
+                    break
+                else:
+                    iter_times = self.init_playout
+                    # iter_times = int(((num_moves - self.depth)/num_moves) * self.init_playout)
+            else:
+                iter_times = self.init_playout
+            for _ in tqdm(
+                range(iter_times),
+                desc=f'Training Monte Carlo Trees, depth "{self.depth}": ',
+            ):
+                game_state = copy.deepcopy(game)
+                self.playout(game_state)
+            if self.root.is_leaf():
+                break
             move = max(
-                self.root.children.items(),
-                key=lambda act_node: act_node[1].n_visits,
+                self.root.children.items(), key=lambda act_node: act_node[1].n_visits,
             )[0]
-            print('current move is:', move)
+            print("current move is:", move)
             print([{x[0]: x[1].n_visits} for x in self.root.children.items()])
             print([{x[0]: x[1].value} for x in self.root.children.items()])
             self.root = self.root.children[move]
@@ -133,31 +149,35 @@ class MCTS:
             next_state(game, move)
         self.root = self.root_total
 
-
     def _train_iter(self, game, iter_playout):
-        count_num = 0
-        temp  = max(
+        count_num, total = 0, 0
+        temp = max(
             self.root.children.items(),
-            key=lambda act_node: act_node[1].n_visits,
-        )[0]
+            key=lambda act_node: act_node[1].get_value(self.c_puct),
+        )
         while count_num < iter_playout:
+            total += 1
+            if total > 2000:
+                break
             game_state = copy.deepcopy(game)
             self.playout(game_state)
-            move = max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits)[0]
+            move = max(
+                self.root.children.items(),
+                key=lambda act_node: act_node[1].get_value(self.c_puct),
+            )
             if move != temp:
                 temp = move
                 count_num = 0
             else:
                 count_num += 1
+        print("total iter:", total)
 
-
-    def result_moves(self):
+    def result_moves(self, num_moves=None):
         move_list = []
         self.root = self.root_total
-        while not self.root.is_leaf():
+        while not self.root.is_leaf() and len(move_list) != num_moves:
             move = max(
-                self.root.children.items(),
-                key=lambda act_node: act_node[1].n_visits,
+                self.root.children.items(), key=lambda act_node: act_node[1].n_visits,
             )[0]
             move_list.append(move)
             self.root = self.root.children[move]

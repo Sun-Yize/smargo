@@ -186,9 +186,9 @@ def if_win(state):
     result1 = state[ORIGIN_WHITE_CHAN] * state[WHITE_CHAN]
     if np.sum(result1) != np.sum(state[ORIGIN_WHITE_CHAN]):
         return 0
-    result2 = state[ORIGIN_BLACK_CHAN] * state[BLACK_CHAN]
-    if np.sum(result2) != np.sum(state[ORIGIN_BLACK_CHAN]):
-        return 1
+    # result2 = state[ORIGIN_BLACK_CHAN] * state[BLACK_CHAN]
+    # if np.sum(result2) != np.sum(state[ORIGIN_BLACK_CHAN]):
+    #     return 1
     return False
 
 

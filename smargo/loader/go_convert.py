@@ -79,13 +79,7 @@ def _test_valid(board_info):
     board_size = board_info["board_size"]
     moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
     board = np.array(board_info["state"])
-    state = np.zeros(
-        (
-            CHAN,
-            board_info["board_size"][0],
-            board_info["board_size"][1],
-        )
-    )
+    state = np.zeros((CHAN, board_info["board_size"][0], board_info["board_size"][1],))
     state[BLACK_CHAN][np.where(board == 0)] = 1
     state[WHITE_CHAN][np.where(board == 1)] = 1
     state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
@@ -183,10 +177,7 @@ def dump_json(board_info, dump_path) -> None:
         json.dump(board_info, f, cls=MyEncoder, sort_keys=True, indent=4)
 
 
-def convert_go_sgf(
-    folder_name: str,
-    dump_floder_name: str,
-) -> None:
+def convert_go_sgf(folder_name: str, dump_floder_name: str,) -> None:
     max_num = 0
 
     json_fold = os.path.join(dump_floder_name, "json")

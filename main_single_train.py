@@ -6,7 +6,7 @@ from smargo.model import MCTS
 from smargo.visualize import plot_go_board, plot_go_file, print_go_tree
 
 root_path = "smargo_50/json/"
-file_list = ['tsumego_000000.json']
+file_list = ["tsumego_000000.json"]
 
 total_num = 0
 total_correct_num = 0
@@ -49,7 +49,5 @@ for file in file_list:
             correct_num += 1
     board_info = json.load(open(file_path))
     board_size = board_info["board_size"][0]
-    board_info["predict"] = [
-        [int(move // board_size), int(move % board_size)] for move in moves
-    ]
+    board_info["predict"] = [[int(move // board_size), int(move % board_size)] for move in moves]
     dump_json(board_info, file_path)

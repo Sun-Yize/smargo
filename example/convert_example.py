@@ -12,7 +12,5 @@ load_path = "output/download/"
 dump_path = "smargo_50/"
 convert_go_sgf(load_path, dump_path)
 
-for file in tqdm(
-    sorted([_ for _ in os.listdir(dump_path + "json") if _.endswith(".json")])
-):
+for file in tqdm(sorted([_ for _ in os.listdir(dump_path + "json") if _.endswith(".json")])):
     plot_go_file(os.path.join(dump_path, "json", file))

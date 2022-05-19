@@ -59,9 +59,7 @@ for file in file_list:
 
     board_info = json.load(open(file_path))
     board_size = board_info["board_size"][0]
-    board_info["predict"] = [
-        [int(move // board_size), int(move % board_size)] for move in moves
-    ]
+    board_info["predict"] = [[int(move // board_size), int(move % board_size)] for move in moves]
     dump_json(board_info, file_path)
 
 print(total_correct_num)

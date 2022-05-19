@@ -18,9 +18,7 @@ class TreeNode:
         self.P = prior_p
 
     def select(self, c_puct):
-        return max(
-            self.children.items(), key=lambda act_node: act_node[1].get_value(c_puct)
-        )
+        return max(self.children.items(), key=lambda act_node: act_node[1].get_value(c_puct))
 
     def expand(self, action_priors):
         for action, prob in action_priors:
@@ -84,9 +82,7 @@ class MCTS:
         for _ in tqdm(range(self.n_playout), desc=f"Training Monte Carlo Trees: "):
             game_state = copy.deepcopy(game)
             self.playout(game_state)
-        return max(
-            self.root.children.items(), key=lambda act_node: act_node[1].n_visits
-        )[0]
+        return max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits)[0]
 
     def update_with_move(self, last_move):
         if last_move in self.root.children:
@@ -139,7 +135,8 @@ class MCTS:
             if self.root.is_leaf():
                 break
             move = max(
-                self.root.children.items(), key=lambda act_node: act_node[1].n_visits,
+                self.root.children.items(),
+                key=lambda act_node: act_node[1].n_visits,
             )[0]
             print("current move is:", move)
             print([{x[0]: x[1].n_visits} for x in self.root.children.items()])
@@ -177,7 +174,8 @@ class MCTS:
         self.root = self.root_total
         while not self.root.is_leaf() and len(move_list) != num_moves:
             move = max(
-                self.root.children.items(), key=lambda act_node: act_node[1].n_visits,
+                self.root.children.items(),
+                key=lambda act_node: act_node[1].n_visits,
             )[0]
             move_list.append(move)
             self.root = self.root.children[move]

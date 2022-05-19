@@ -42,19 +42,14 @@ class MyEncoder(json.JSONEncoder):
                 id = int(match.group(1))
                 no_indent = PyObj_FromPtr(id)
                 json_repr = json.dumps(no_indent.value, **self._kwargs)
-                encoded = encoded.replace(
-                    '"{}"'.format(format_spec.format(id)), json_repr
-                )
+                encoded = encoded.replace('"{}"'.format(format_spec.format(id)), json_repr)
             yield encoded
 
 
 def load_sgf(file_path: str) -> Dict:
     board_info = {}
     sgf_info = "".join(
-        [
-            line.strip("\n")
-            for line in open(file_path, "r", encoding="utf-8").readlines()
-        ]
+        [line.strip("\n") for line in open(file_path, "r", encoding="utf-8").readlines()]
     )
     add_step = _load_sgf_str(sgf_info)
     if "turn" not in board_info:
@@ -79,7 +74,13 @@ def _test_valid(board_info):
     board_size = board_info["board_size"]
     moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
     board = np.array(board_info["state"])
-    state = np.zeros((CHAN, board_info["board_size"][0], board_info["board_size"][1],))
+    state = np.zeros(
+        (
+            CHAN,
+            board_info["board_size"][0],
+            board_info["board_size"][1],
+        )
+    )
     state[BLACK_CHAN][np.where(board == 0)] = 1
     state[WHITE_CHAN][np.where(board == 1)] = 1
     state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
@@ -123,10 +124,7 @@ def _load_sgf_str(sgf_info: str):
 
 def _prase_sgf_str(string: str, index: str):
     result = "".join(
-        [
-            m.group().replace(index, "")
-            for m in re.finditer(index + r"(\[[a-zA-Z]+\])+", string)
-        ]
+        [m.group().replace(index, "") for m in re.finditer(index + r"(\[[a-zA-Z]+\])+", string)]
     )
     result = result.strip("[").strip("]").split("][")
     return result
@@ -177,7 +175,10 @@ def dump_json(board_info, dump_path) -> None:
         json.dump(board_info, f, cls=MyEncoder, sort_keys=True, indent=4)
 
 
-def convert_go_sgf(folder_name: str, dump_floder_name: str,) -> None:
+def convert_go_sgf(
+    folder_name: str,
+    dump_floder_name: str,
+) -> None:
     max_num = 0
 
     json_fold = os.path.join(dump_floder_name, "json")

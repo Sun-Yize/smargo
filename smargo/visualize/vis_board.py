@@ -21,9 +21,9 @@ def _plot_board_state(state: List, moves: List, save_path: str, bgc: bool = True
     for init_point in zip(*np.where(state[WHITE_CHAN] == 1)):
         white_list.append([init_point[1], board_size - init_point[0] - 1])
     _plot_go_figure(
-        board_size, 
-        black_list, 
-        white_list, 
+        board_size,
+        black_list,
+        white_list,
         os.path.join(save_path, "original.png"),
         bgc=bgc,
     )
@@ -95,9 +95,7 @@ def plot_go_board(
         os.mkdir(dir_name)
     _plot_board_state(state, moves, dir_name, bgc=bgc)
     if generate_gif:
-        imgs = (
-            Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name))
-        )
+        imgs = (Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name)))
         img = next(imgs)  # extract first image from iterator
         img.save(
             fp=os.path.join(dir_name, "result.gif"),
@@ -110,9 +108,9 @@ def plot_go_board(
 
 
 def plot_go_file(
-    file_path: str, 
-    export_path: str = None, 
-    generate_gif: bool = True, 
+    file_path: str,
+    export_path: str = None,
+    generate_gif: bool = True,
     bgc: bool = True,
 ) -> None:
     board_info = json.load(open(file_path))
@@ -128,10 +126,7 @@ def plot_go_file(
     try:
         _plot_board_state(state, moves, dir_name, bgc=bgc)
         if generate_gif:
-            imgs = (
-                Image.open(os.path.join(dir_name, f))
-                for f in sorted(os.listdir(dir_name))
-            )
+            imgs = (Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name)))
             img = next(imgs)
             img.save(
                 fp=os.path.join(dir_name, "result.gif"),

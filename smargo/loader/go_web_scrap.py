@@ -51,9 +51,7 @@ def go_scraping(write_path="data/download/"):
                 os.mkdir(dir_path)
             for go_set in item[1]:
                 for i in range(30):
-                    filename = (
-                        go_set.replace("S", "L") + "-" + str(i + 1).zfill(4) + ".sgf"
-                    )
+                    filename = go_set.replace("S", "L") + "-" + str(i + 1).zfill(4) + ".sgf"
                     image_url = os.path.join(root_path, item[0], go_set, filename)
                     print(image_url)
                     try:

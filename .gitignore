@@ -1,5 +1,7 @@
 **/__pycache__
 .idea/*
+dist/*
+smargo.egg-info/*
 
 data/*
 dataset/*

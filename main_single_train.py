@@ -26,7 +26,7 @@ for file in file_list:
     num_moves = len(ground_truth)
 
     mcts = MCTS(c_puct=5)
-    mcts.train(state, init_playout=init_playout, num_moves=8)
+    mcts.train(state, init_playout=init_playout, num_moves=num_moves)
 
     # print_go_tree(mcts.root, max_depth=4)
 

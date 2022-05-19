@@ -79,7 +79,7 @@ def _plot_go_figure(board_size, black_list, white_list, save_path, bgc):
 def plot_go_board(
     state: np.array,
     moves: List,
-    export_path: str = "data/current_state/",
+    export_path: str = "output/current_state/",
     generate_gif: bool = True,
     bgc: bool = True,
 ) -> None:

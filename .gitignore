@@ -1,4 +1,8 @@
 **/__pycache__
+.idea/*
 
-data/*
 dataset/*
+# output/*
+
+smargo_30/*
+smargo_50/*

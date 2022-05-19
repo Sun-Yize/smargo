@@ -12,7 +12,7 @@ from ..structure.board import next_state
 from ..structure.constant import *
 
 
-def _plot_board_state(state: List, moves: List, save_path: str) -> None:
+def _plot_board_state(state: List, moves: List, save_path: str, bgc: bool = True) -> None:
     board_size = state.shape[1]
 
     black_list, white_list = [], []
@@ -21,7 +21,11 @@ def _plot_board_state(state: List, moves: List, save_path: str) -> None:
     for init_point in zip(*np.where(state[WHITE_CHAN] == 1)):
         white_list.append([init_point[1], board_size - init_point[0] - 1])
     _plot_go_figure(
-        board_size, black_list, white_list, os.path.join(save_path, "original.png")
+        board_size, 
+        black_list, 
+        white_list, 
+        os.path.join(save_path, "original.png"),
+        bgc=bgc,
     )
 
     for idx, move in enumerate(moves):
@@ -36,12 +40,14 @@ def _plot_board_state(state: List, moves: List, save_path: str) -> None:
             black_list,
             white_list,
             os.path.join(save_path, "step" + str(idx + 1).zfill(2) + ".png"),
+            bgc=bgc,
         )
 
 
-def _plot_go_figure(board_size, black_list, white_list, save_path):
+def _plot_go_figure(board_size, black_list, white_list, save_path, bgc):
     fig = plt.figure(figsize=[8, 8])
-    fig.patch.set_facecolor((1, 1, 0.8))
+    if bgc:
+        fig.patch.set_facecolor((1, 1, 0.8))
     ax = fig.add_subplot(111)
     for x in range(board_size):
         ax.plot([x, x], [0, board_size - 1], "k")
@@ -79,6 +85,7 @@ def plot_go_board(
     moves: List,
     export_path: str = "data/current_state/",
     generate_gif: bool = True,
+    bgc: bool = True,
 ) -> None:
     dir_name = export_path
     if not os.path.exists(dir_name):
@@ -86,7 +93,7 @@ def plot_go_board(
     else:
         shutil.rmtree(dir_name)
         os.mkdir(dir_name)
-    _plot_board_state(state, moves, dir_name)
+    _plot_board_state(state, moves, dir_name, bgc=bgc)
     if generate_gif:
         imgs = (
             Image.open(os.path.join(dir_name, f)) for f in sorted(os.listdir(dir_name))
@@ -103,7 +110,10 @@ def plot_go_board(
 
 
 def plot_go_file(
-    file_path: str, export_path: str = None, generate_gif: bool = True
+    file_path: str, 
+    export_path: str = None, 
+    generate_gif: bool = True, 
+    bgc: bool = True,
 ) -> None:
     board_info = json.load(open(file_path))
     board_size = board_info["board_size"]
@@ -116,7 +126,7 @@ def plot_go_file(
         shutil.rmtree(dir_name)
         os.mkdir(dir_name)
     try:
-        _plot_board_state(state, moves, dir_name)
+        _plot_board_state(state, moves, dir_name, bgc=bgc)
         if generate_gif:
             imgs = (
                 Image.open(os.path.join(dir_name, f))

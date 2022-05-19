@@ -8,8 +8,8 @@ from smargo.visualize import plot_go_file
 # info = load_sgf('data/sgf/tsumego_000000.sgf')
 # dump_json(info, 'data/test1.json')
 
-load_path = "data/download/"
-dump_path = "data/"
+load_path = "output/download/"
+dump_path = "smargo_50/"
 convert_go_sgf(load_path, dump_path)
 
 for file in tqdm(

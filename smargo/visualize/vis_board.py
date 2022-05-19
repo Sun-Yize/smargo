@@ -21,11 +21,7 @@ def _plot_board_state(state: List, moves: List, save_path: str, bgc: bool = True
     for init_point in zip(*np.where(state[WHITE_CHAN] == 1)):
         white_list.append([init_point[1], board_size - init_point[0] - 1])
     _plot_go_figure(
-        board_size,
-        black_list,
-        white_list,
-        os.path.join(save_path, "original.png"),
-        bgc=bgc,
+        board_size, black_list, white_list, os.path.join(save_path, "original.png"), bgc=bgc,
     )
 
     for idx, move in enumerate(moves):
@@ -108,16 +104,13 @@ def plot_go_board(
 
 
 def plot_go_file(
-    file_path: str,
-    export_path: str = None,
-    generate_gif: bool = True,
-    bgc: bool = True,
+    file_path: str, export_path: str = None, generate_gif: bool = True, bgc: bool = True,
 ) -> None:
     board_info = json.load(open(file_path))
     board_size = board_info["board_size"]
     moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
     state = go_board_init(file_path)
-    dir_name = export_path if export_path else file_path.strip(".json") + "/"
+    dir_name = export_path if export_path else file_path.rstrip(".json") + "/"
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
     else:

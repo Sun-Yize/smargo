@@ -74,13 +74,7 @@ def _test_valid(board_info):
     board_size = board_info["board_size"]
     moves = [move[0] * board_size[0] + move[1] for move in board_info["ground_truth"]]
     board = np.array(board_info["state"])
-    state = np.zeros(
-        (
-            CHAN,
-            board_info["board_size"][0],
-            board_info["board_size"][1],
-        )
-    )
+    state = np.zeros((CHAN, board_info["board_size"][0], board_info["board_size"][1]))
     state[BLACK_CHAN][np.where(board == 0)] = 1
     state[WHITE_CHAN][np.where(board == 1)] = 1
     state[ORIGIN_WHITE_CHAN] = state[WHITE_CHAN]
@@ -175,10 +169,7 @@ def dump_json(board_info, dump_path) -> None:
         json.dump(board_info, f, cls=MyEncoder, sort_keys=True, indent=4)
 
 
-def convert_go_sgf(
-    folder_name: str,
-    dump_floder_name: str,
-) -> None:
+def convert_go_sgf(folder_name: str, dump_floder_name: str,) -> None:
     max_num = 0
 
     json_fold = os.path.join(dump_floder_name, "json")
@@ -191,7 +182,7 @@ def convert_go_sgf(
         json_files = [_ for _ in os.listdir(dump_floder_name) if _.endswith(".json")]
         if len(json_files) != 0:
             max_num_file = sorted(json_files)[-1]
-            max_num = int(max_num_file.strip(".json").split("_")[1]) + 1
+            max_num = int(max_num_file.rstrip(".json").split("_")[1]) + 1
     for path, _, file_list in os.walk(folder_name):
         for file_name in file_list:
             file_path = os.path.join(path, file_name)

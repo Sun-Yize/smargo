@@ -127,17 +127,13 @@ class MCTS:
             else:
                 iter_times = self.init_playout
             for _ in tqdm(
-                range(iter_times),
-                desc=f'Training Monte Carlo Trees, depth "{self.depth}": ',
+                range(iter_times), desc=f'Training Monte Carlo Trees, depth "{self.depth}": ',
             ):
                 game_state = copy.deepcopy(game)
                 self.playout(game_state)
             if self.root.is_leaf():
                 break
-            move = max(
-                self.root.children.items(),
-                key=lambda act_node: act_node[1].n_visits,
-            )[0]
+            move = max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits,)[0]
             print("current move is:", move)
             print([{x[0]: x[1].n_visits} for x in self.root.children.items()])
             print([{x[0]: x[1].value} for x in self.root.children.items()])
@@ -149,8 +145,7 @@ class MCTS:
     def _train_iter(self, game, iter_playout):
         count_num, total = 0, 0
         temp = max(
-            self.root.children.items(),
-            key=lambda act_node: act_node[1].get_value(self.c_puct),
+            self.root.children.items(), key=lambda act_node: act_node[1].get_value(self.c_puct),
         )
         while count_num < iter_playout:
             total += 1
@@ -159,8 +154,7 @@ class MCTS:
             game_state = copy.deepcopy(game)
             self.playout(game_state)
             move = max(
-                self.root.children.items(),
-                key=lambda act_node: act_node[1].get_value(self.c_puct),
+                self.root.children.items(), key=lambda act_node: act_node[1].get_value(self.c_puct),
             )
             if move != temp:
                 temp = move
@@ -173,11 +167,22 @@ class MCTS:
         move_list = []
         self.root = self.root_total
         while not self.root.is_leaf() and len(move_list) != num_moves:
-            move = max(
-                self.root.children.items(),
-                key=lambda act_node: act_node[1].n_visits,
-            )[0]
+            move = max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits,)[0]
             move_list.append(move)
+            self.root = self.root.children[move]
+            self.root.parent = None
+        return move_list
+
+    def result_moves_top3(self, num_moves=None):
+        move_list = []
+        self.root = self.root_total
+        while not self.root.is_leaf() and len(move_list) != num_moves:
+            move = max(self.root.children.items(), key=lambda act_node: act_node[1].n_visits,)[0]
+            move_result = sorted(
+                self.root.children.items(), key=lambda act_node: act_node[1].n_visits,
+            )[:3]
+            move_result = [x[0] for x in move_result]
+            move_list.append(move_result)
             self.root = self.root.children[move]
             self.root.parent = None
         return move_list

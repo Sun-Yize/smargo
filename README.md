@@ -34,13 +34,13 @@ $ python -m pip install dist/*
 
 ## Datasets
 
-Smargo Datasets contains two subsets: Smarge_30 and Smarge_50.
+Smargo Datasets contains two subsets: Smargo_30 and Smargo_50.
 
 Download the datasets from Google Drive:
 
-+ Smarge_30 Dataset: [download link](https://drive.google.com/file/d/1CiU7mu1qBz-msiSqy5UaCItTYYNbwP49/view?usp=sharing)
++ Smargo_30 Dataset: [download link](https://drive.google.com/file/d/1CiU7mu1qBz-msiSqy5UaCItTYYNbwP49/view?usp=sharing)
 
-+ Smarge_50 Dataset: [download link](https://drive.google.com/file/d/1AsqK1F97d4r9Dil9GDOs3YrUUBqNbz7E/view?usp=sharing)
++ Smargo_50 Dataset: [download link](https://drive.google.com/file/d/1AsqK1F97d4r9Dil9GDOs3YrUUBqNbz7E/view?usp=sharing)
 
 ## Usage
 
